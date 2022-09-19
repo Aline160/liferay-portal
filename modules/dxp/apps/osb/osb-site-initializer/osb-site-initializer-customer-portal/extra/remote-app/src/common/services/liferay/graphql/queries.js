@@ -581,3 +581,19 @@ export const updateAnalyticsCloudWorkspace = gql`
 		}
 	}
 `;
+
+export const updateLiferayExperienceCloudEnvironment = gql`
+	mutation updateLiferayExperienceCloudEnvironmentProjectId(
+		$liferayExperienceCloudEnvironmentId: Long!
+		$LiferayExperienceCloudEnvironment: InputC_LiferayExperienceCloudEnvironment!
+	) {
+		c {
+			updateLiferayExperienceCloudEnvironment(
+				liferayExperienceCloudEnvironmentId: $liferayExperienceCloudEnvironmentId
+				LiferayExperienceCloudEnvironment: $LiferayExperienceCloudEnvironment
+			) {
+				liferayExperienceCloudEnvironmentId
+			}
+		}
+	}
+`;

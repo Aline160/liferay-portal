@@ -8,24 +8,37 @@
  * permissions and limitations under the License, including but not limited to
  * distribution rights of the Software.
  */
+import ClayAlert from '@clayui/alert';
+import {useModal} from '@clayui/modal';
 import {useState} from 'react';
 import {useAppPropertiesContext} from '../../../../../common/contexts/AppPropertiesContext';
 import {useGetAccountSubscriptionGroups} from '../../../../../common/services/liferay/graphql/account-subscription-groups/queries/useGetAccountSubscriptionGroups';
-import {STATUS_TAG_TYPE_NAMES} from '../../../utils/constants';
+import {ALERT_UPDATE_LIFERAY_EXPERIENCE_CLOUD_STATUS} from '../../../containers/ActivationKeysTable/utils/constants/alertUpdateLiferayExperienceCloud';
+import {
+	AUTO_CLOSE_ALERT_TIME,
+	STATUS_TAG_TYPE_NAMES,
+} from '../../../utils/constants';
 import ActivationStatusLayout from '../Layout';
+import LiferayExperienceCloudModal from './LiferayExperienceCloudModal';
 import SetupLiferayExperienceCloudModal from './components/SetupLXCModal';
 import useActivationStatusDate from './hooks/useActivationStatusDate';
 import useOnCloseSetupModal from './hooks/useOnCloseSetupModal';
 import getActivationStatusCardLayout from './utils/getActivationStatusCardLayout';
 
 const ActivationStatusLiferayExperienceCloud = ({
+	data,
+	dispatch,
 	lxcEnvironment,
 	project,
 	subscriptionGroupLxcEnvironment,
+	subscriptionGroups,
 	userAccount,
 }) => {
 	const {liferayWebDAV} = useAppPropertiesContext();
 	const [isVisibleSetupLxcModal, setIsVisibleSetupLxcModal] = useState(false);
+	const [projectIdValue, setProjectIdValue] = useState('');
+	const [hasFinishedUpdate, setHasFinishedUpdate] = useState(false);
+	const [visible, setVisible] = useState(false);
 	const [lxcStatusActivation, setStatusLxcActivation] = useState(
 		subscriptionGroupLxcEnvironment?.activationStatus
 	);
@@ -36,8 +49,16 @@ const ActivationStatusLiferayExperienceCloud = ({
 		lxcEnvironment,
 		project,
 		() => setIsVisibleSetupLxcModal(true),
+		() => setVisible(true),
 		userAccount
 	);
+
+	const {
+		observer: observerStatusModal,
+		onClose: onCloseStatusModal,
+	} = useModal({
+		onClose: () => setVisible(false),
+	});
 
 	const {data: dataSubscriptionGroups} = useGetAccountSubscriptionGroups({
 		fetchPolicy: 'network-only',
@@ -71,11 +92,46 @@ const ActivationStatusLiferayExperienceCloud = ({
 				/>
 			)}
 
+			{visible && (
+				<LiferayExperienceCloudModal
+					accountKey={project.accountKey}
+					data={data}
+					dispatch={dispatch}
+					lxcEnvironment={lxcEnvironment}
+					observer={observerStatusModal}
+					onClose={onCloseStatusModal}
+					project={project}
+					projectIdValue={projectIdValue}
+					setHasFinishedUpdate={() => setHasFinishedUpdate(true)}
+					setProjectIdValue={setProjectIdValue}
+					setStatusLxcActivation={() =>
+						setStatusLxcActivation(STATUS_TAG_TYPE_NAMES.active)
+					}
+					subscriptionGroupLxcEnvironment={
+						subscriptionGroupLxcEnvironment
+					}
+					subscriptionGroups={subscriptionGroups}
+				/>
+			)}
+
+			{hasFinishedUpdate && (
+				<ClayAlert.ToastContainer>
+					<ClayAlert
+						autoClose={AUTO_CLOSE_ALERT_TIME.success}
+						displayType="success"
+						onClose={() => setHasFinishedUpdate(false)}
+					>
+						{ALERT_UPDATE_LIFERAY_EXPERIENCE_CLOUD_STATUS.success}
+					</ClayAlert>
+				</ClayAlert.ToastContainer>
+			)}
+
 			<ActivationStatusLayout
 				activationStatus={activationStatus}
 				activationStatusDate={activationStatusDate}
 				iconPath={`${liferayWebDAV}/assets/navigation-menu/dxp_icon.svg`}
 				project={project}
+				subscriptionGroupActivationStatus={lxcStatusActivation}
 			/>
 		</div>
 	);
