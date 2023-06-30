@@ -10,6 +10,7 @@
  */
 
 import {useMutation} from '@apollo/client';
+import NotificationQueueService from '../../../../../../../../../../../../../src/common/services/actions/notificationAction';
 import {useAppPropertiesContext} from '../../../../../../../../../../../../common/contexts/AppPropertiesContext';
 import {
 	useCreateAdminLiferayExperienceCloud,
@@ -117,6 +118,43 @@ export default function useSubmitLXCEnvironment(
 							});
 						}
 					)
+				);
+
+				const emailProjectAdmin = lxcActivationFields?.admins
+					?.map(({email}) => email)
+					.join(', ');
+
+				const adminFirstNames = [];
+				const adminLastNames = [];
+
+				lxcActivationFields?.admins.forEach((admin) => {
+					const fullName = admin.fullName;
+					const formattedAdminFullName = fullName.split(' ');
+					const firstNameAdmin = formattedAdminFullName[0];
+					const lastNameAdmin = formattedAdminFullName
+						.slice(1)
+						.join(' ');
+
+					adminFirstNames.push(firstNameAdmin);
+					adminLastNames.push(lastNameAdmin);
+				});
+
+				const notificationTemplateService = new NotificationQueueService(
+					client
+				);
+
+				await notificationTemplateService.send(
+					'SETUP-LXC-ENVIRONMENT-NOTIFICATION-TEMPLATE',
+					{
+						'[%DATE_AND_TIME_SUBMITTED%]': new Date().toUTCString(),
+						'[%PROJECT_CODE%]': project.code,
+						'[%PROJECT_DATA_CENTER_REGION%]':
+							lxcActivationFields.primaryRegion,
+						'[%PROJECT_ID%]': lxcActivationFields.projectId,
+						'[%USER_EMAIL%]': emailProjectAdmin,
+						'[%USER_FIRST_NAME%]': adminFirstNames.join(', '),
+						'[%USER_LAST_NAME%]': adminLastNames.join(', '),
+					}
 				);
 			}
 
