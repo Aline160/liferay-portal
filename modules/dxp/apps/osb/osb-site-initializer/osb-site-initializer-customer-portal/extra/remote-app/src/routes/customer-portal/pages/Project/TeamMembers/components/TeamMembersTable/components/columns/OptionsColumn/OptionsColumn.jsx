@@ -10,6 +10,7 @@ import MenuUserActions from './components/MenuUserActions';
 
 const OptionsColumn = ({
 	edit,
+	isRemoveDisabled,
 	onCancel,
 	onEdit,
 	onRemove,
@@ -24,8 +25,11 @@ const OptionsColumn = ({
 		},
 		{
 			customOptionStyle: 'pr-5',
+			disabled: isRemoveDisabled,
 			label: i18n.translate('remove'),
 			onClick: () => onRemove(),
+			tooltip:
+				'Incident Contact cannot be removed. Please assign the Incident Contact role to at least one other team member before proceeding."',
 		},
 	];
 

@@ -20,6 +20,8 @@ export const GET_LIFERAY_EXPERIENCE_CLOUD_ENVIRONMENTS = gql`
 				items {
 					liferayExperienceCloudEnvironmentId
 					projectId
+					incidentManagementFullName
+					incidentManagementEmailAddress
 				}
 			}
 		}
