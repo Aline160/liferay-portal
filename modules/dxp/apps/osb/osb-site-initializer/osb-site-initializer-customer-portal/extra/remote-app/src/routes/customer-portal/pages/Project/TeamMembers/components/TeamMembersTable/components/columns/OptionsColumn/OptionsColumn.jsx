@@ -10,22 +10,33 @@ import MenuUserActions from './components/MenuUserActions';
 
 const OptionsColumn = ({
 	edit,
+	highPriorityContactsNames,
 	onCancel,
 	onEdit,
 	onRemove,
 	onSave,
 	saveDisabled,
+	userAccount,
 }) => {
 	const userOptions = [
 		{
 			customOptionStyle: 'pr-5',
 			label: i18n.translate('edit'),
-			onClick: () => onEdit(),
+			onClick: () => {
+				onEdit();
+			},
 		},
 		{
 			customOptionStyle: 'pr-5',
+			disabled: highPriorityContactsNames.includes(userAccount.name),
 			label: i18n.translate('remove'),
-			onClick: () => onRemove(),
+			onClick: () => {
+				onRemove();
+			},
+
+			tooltip: i18n.translate(
+				'this-team-member-is-assigned-as-an-Incident-contact-and-cannot-be-removed'
+			),
 		},
 	];
 
